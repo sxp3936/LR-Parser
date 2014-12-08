@@ -9,6 +9,7 @@ import java.util.Stack;
 public class Parser {
 
 	public static File fp;
+	public static String inputFile;
 	public static FileReader f;
 	public static BufferedReader br;
 	public static int charClass;
@@ -31,6 +32,10 @@ public class Parser {
 	
 	private static Queue <String> inputData = new LinkedList <String>();
 	private static Stack <String> pushStack = new Stack <String>();
+	public Parser(String fileName){
+		System.out.println("File to parse : "+fileName);
+		inputFile = fileName;
+	}
 	
 	private static String ParseTable[][] = new String [][]{{ "S5","", "","S4","","","1","2","3"},
         { "","S6", "","","","accept","","",""},
@@ -47,13 +52,13 @@ public class Parser {
 
 
 	
-	public static void parse(String args) throws IOException
+	public static void parse() 
 	
 	{
 		
 		try
 		{
-		 fp  = new File(args);
+		 fp  = new File(inputFile);
 		}
 		catch(Exception e)
 		{
@@ -70,10 +75,16 @@ public class Parser {
 			System.out.println("File not found");
 			
 		}
-		getChar();
-		do{
-			nextToken = lex();
-		}while(nextToken!=EOF);
+		try {
+			getChar();
+			do{
+				nextToken = lex();
+			}while(nextToken!=EOF);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 		String result = "";
 		pushStack.push("0");
@@ -90,7 +101,41 @@ public class Parser {
 			out = String.format ("%-30s",pushStack);
 			System.out.print(out);
            String q_head = (String)inputData.peek();
-	       switch(q_head){
+           
+           if (q_head.equals("id"))
+           {
+        	   symbol=0;
+           }
+           
+           else if (q_head.equals("+"))
+        	   
+           {
+        	   symbol=1;
+           }
+           else if (q_head.equals("*"))
+        	   
+           {
+        	   symbol=2;
+           }
+           else if (q_head.equals("("))
+       	   
+          {
+       	   symbol=3;
+          }
+          else if (q_head.equals(")"))
+       	   
+          {
+       	   symbol=4;
+          }
+          else if (q_head.equals("$"))
+       	   
+          {
+       	   symbol=5;
+          }
+          else
+        	  System.out.println("Error in Grammar");
+           
+	      /* switch(q_head){
 	           case "id": symbol = 0;break;
 	           case "+": symbol = 1;break;
 	           case "*": symbol = 2;break;
@@ -98,7 +143,8 @@ public class Parser {
 	           case ")": symbol = 4;break; 
 	           case "$": symbol = 5;break;
 	           default: break;
-           }
+           } */
+           
 	       String tv = pushStack.peek();
 	       int state = getLastDigit(tv);
 	       //System.out.print(inputData+"\t");
@@ -116,7 +162,37 @@ public class Parser {
 	    if(parseValue.charAt(0)=='S'){
 	    	processShift(parseValue, state);
 	    }else{
-	    	switch(parseValue){
+	    	if(parseValue.equals("R1"))
+	    	{
+	    		processReduce("R1", state, symbol);
+	    	}
+	    	else if(parseValue.equals("R2"))
+	    	{
+	    		processReduce("R2", state, symbol);
+	    	}
+	    	else if(parseValue.equals("R3"))
+	    	{
+	    		processReduce("R3", state, symbol);
+	    	}
+	    	else if(parseValue.equals("R4"))
+	    	{
+	    		processReduce("R4", state, symbol);
+	    	}
+	    	else if(parseValue.equals("R5"))
+	    	{
+	    		processReduce("R5", state, symbol);
+	    	}
+	    	else if(parseValue.equals("R6"))
+	    	{
+	    		processReduce("R6", state, symbol);
+	    	}
+	    	else if(parseValue.equals("accept"))
+	    	{
+	    		String out = String.format ("%-10s %-15s","["+state+","+inputData.element()+"]","accept");
+    			System.out.print(out);
+	    	}
+	    		
+	    	/*switch(parseValue){
 	    		case "R1" : processReduce("R1", state, symbol);
 	    					break;
 	    		case "R2" : processReduce("R2", state, symbol);
@@ -130,11 +206,11 @@ public class Parser {
 	    		case "R6" : processReduce("R6", state, symbol);
 	    					break;
 	    		case "accept": //System.out.print("["+state+","+inputData.element()+"]"+"\t");
-                			//System.out.println("accept"+"\t");
+                			//System.out.println("accept"+"\t"); 
                 			String out = String.format ("%-10s %-15s","["+state+","+inputData.element()+"]","accept");
                 			System.out.print(out);
                 			break;
-	    	}
+	    	}*/
 	    }
 	    return parseValue;
 	}
@@ -142,7 +218,45 @@ public class Parser {
 	public static String processRules(String type){
 		String lhs = "";
 		String symbol = "";
-		switch(type){
+		if(type.equals("R1"))
+		{
+			lhs = "E";
+			timePop(3, lhs);
+			symbol = "6";
+		}
+		else if(type.equals("R2"))
+		{
+			lhs = "E";
+			timePop(1, lhs);
+			symbol = "6";
+		}
+		else if(type.equals("R3"))
+		{
+			lhs = "T";
+			timePop(3, lhs);
+			symbol = "7";
+		}
+		else if(type.equals("R4"))
+		{
+			lhs = "T";
+			timePop(1, lhs);
+			symbol = "7";
+		}
+		else if(type.equals("R5"))
+		{
+			lhs = "F";
+			timePop(3, lhs);
+			symbol = "8";
+		}
+		else if(type.equals("R6"))
+		{
+			lhs = "F";
+			timePop(1, lhs);
+			symbol = "8";
+		}
+			return lhs+ "#" + symbol;
+		
+		/*switch(type){
 		case "R1":	lhs = "E";
 					timePop(3, lhs);
 					symbol = "6";
@@ -168,7 +282,7 @@ public class Parser {
 				symbol = "8";
 				break;
 		}
-		return lhs+ "#" + symbol;
+		return lhs+ "#" + symbol;*/
 	}
 	
 	public static void timePop(int count, String lhs){
@@ -233,7 +347,50 @@ public class Parser {
 		// TODO Auto-generated method stub
 		lexLen=0;
 		getNonBlank();
-		switch(charClass)
+		if(charClass == LETTER){
+			 addChar();
+	            getChar();
+	           
+	            int i=0;
+	            while(charClass == LETTER || charClass == DIGIT)
+	            {
+	            	
+	                 addChar();
+	                 getChar();
+	                 i++;
+	            }
+	            nextToken =IDENT;
+		}
+		else if(charClass== DIGIT){
+			 addChar();
+	            getChar();
+	           while(charClass == DIGIT)
+	           {
+	                addChar();
+	                getChar();
+	           }
+	           nextToken =IDENT;
+		}
+		else if(charClass== UNKNOWN){
+			nextToken=lookup(nextChar);
+            getChar();
+            if(nextToken==EOF)
+            {
+            	lex();
+            	
+		    }
+		}
+		else if(charClass==EOF){
+			
+			nextToken = EOF;
+        lexeme[0] ='E';
+        lexeme[1] ='O';
+        lexeme[2] ='F';
+        lexeme[3] = 0;
+        return nextToken;
+		}
+		
+		/*switch(charClass)
 		{
         case LETTER :
             addChar();
@@ -277,7 +434,8 @@ public class Parser {
             lexeme[2] ='F';
             lexeme[3] = 0;
             return nextToken;
-           }
+           }*/
+		
 		String s ="";
        int i=0;
 		while(lexeme[i]!=0)
@@ -296,8 +454,10 @@ public class Parser {
 	}
 	public static int lookup(char nextChar2) {
 
-		// TODO Auto-generated method stub
-		switch(nextChar2)
+// TODO Auto-generated method stub
+
+		 
+            switch(nextChar2)
 	     {
 	         case '(' :
 	                    addChar();
@@ -334,11 +494,10 @@ public class Parser {
 	     }
 	     return nextToken;
 	
+	}	
 		
 		
 		
-		
-	}
 	public static void addChar() {
 		// TODO Auto-generated method stub
 		  if(lexLen <= 98)
@@ -397,4 +556,3 @@ public class Parser {
 	
           
 }
-
